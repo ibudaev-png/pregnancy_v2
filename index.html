@@ -1,0 +1,349 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pregnancy Check</title>
+
+  <style>
+    :root{
+      --bg: url("https://static.vecteezy.com/system/resources/previews/025/765/544/non_2x/banner-about-pregnancy-and-motherhood-with-place-for-text-pretty-pregnant-woman-with-long-hair-on-the-background-of-green-leaves-pregnancy-banner-happy-mother-s-day-flat-illustration-vector.jpg");
+      --overlay: rgba(0,0,0,0);
+
+      --card: rgba(255,255,255,.20);
+      --cardBorder: rgba(255,255,255,.30);
+      --text: #0f2430;
+      --line: #ff4a2f;
+      --btn: #ffffff;
+      --btnText: #0f2430;
+      --shadow: 0 18px 45px rgba(0,0,0,.18);
+      --radius: 22px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; margin:0; }
+
+    body{
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Helvetica Neue", sans-serif;
+      color: var(--text);
+      background-color:#eaf3f7;
+      background-image: linear-gradient(var(--overlay), var(--overlay)), var(--bg);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      overflow:hidden;
+    }
+
+    /* ✅ Fullscreen anchor */
+    .stage{
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* ✅ Hard center container (no flex bugs) */
+    .center{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      padding: 18px;
+      display: block;
+    }
+
+    .glass{
+      width: min(560px, 94vw);
+      margin: 0 auto;              /* ✅ center card */
+      border-radius: var(--radius);
+      background: var(--card);
+      border: 1px solid var(--cardBorder);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      padding: 26px 22px;
+      text-align: center;
+    }
+
+    h1{
+      margin: 0 0 16px 0;
+      font-size: clamp(22px, 3vw, 30px);
+      letter-spacing: .2px;
+    }
+
+    .btn{
+      appearance:none;
+      border:0;
+      cursor:pointer;
+      padding: 12px 18px;
+      border-radius: 14px;
+      background: var(--btn);
+      color: var(--btnText);
+      font-weight: 800;
+      font-size: 15px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.16);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); box-shadow: 0 14px 28px rgba(0,0,0,.18); }
+    .btn:active{ transform: translateY(1px); box-shadow: 0 8px 18px rgba(0,0,0,.16); }
+
+    .iconWrap{
+      margin: 8px auto 18px;
+      width: 86px;
+      height: 86px;
+      border-radius: 22px;
+      background: rgba(255,255,255,.22);
+      border: 1px solid rgba(255,255,255,.28);
+      display:grid;
+      place-items:center;
+    }
+    .pregIcon{ width:54px; height:54px; display:block; }
+
+    .screen{ display:none; }
+    .screen.active{ display:block; }
+
+    /* ✅ Test centered */
+    .testWrap{
+      width: 100%;
+      position: relative;
+      padding: 10px 0 6px;
+    }
+    .test{
+      width: min(520px, 92vw);
+      height: 150px;
+      position: relative;
+      margin: 0 auto;              /* ✅ reliable center */
+      filter: drop-shadow(0 14px 24px rgba(0,0,0,.18));
+    }
+
+    .test .body{
+      position:absolute; inset:0;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.6);
+    }
+    .test .pink{
+      position:absolute; left:0; top:0; bottom:0;
+      width: 46%;
+      border-radius: 999px 0 0 999px;
+      background: linear-gradient(180deg, rgba(255,137,179,.95), rgba(255,88,144,.92));
+    }
+    .test .shine{
+      position:absolute; left: 6%; top: 16%;
+      width: 34%; height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.55);
+      transform: rotate(-2deg);
+    }
+    .test .window{
+      position:absolute; left: 56%; top: 34%;
+      width: 30%; height: 48%;
+      border-radius: 999px;
+      background: rgba(255,255,255,.9);
+      border: 2px solid rgba(255,120,155,.35);
+      outline: 3px solid rgba(0,0,0,.06);
+      outline-offset: -10px;
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: 18px;
+    }
+    .stripe{
+      width: 10px; height: 64px;
+      border-radius: 10px;
+      background: var(--line);
+      opacity: 1;
+      transition: opacity .15s ease;
+    }
+    .stripe.hidden{ opacity: 0; }
+    .test .capMark{
+      position:absolute; right: 5%; top: 34%;
+      width: 10px; height: 52%;
+      border-radius: 10px;
+      background: rgba(0,0,0,.15);
+    }
+
+    .loaderRow{ margin-top: 18px; display:flex; justify-content:center; }
+    .loader{
+      width: min(520px, 92vw);
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.30);
+      border: 1px solid rgba(255,255,255,.35);
+      overflow:hidden;
+    }
+    .bar{
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(255,91,126,.95), rgba(255,159,188,.95));
+      transition: width .12s linear;
+    }
+    .status{ margin-top: 10px; font-weight: 800; color: rgba(15,36,48,.85); }
+
+    /* ✅ Popup without grey overlay */
+    .popupOverlay{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background: rgba(0,0,0,0);
+    }
+
+    .resultTitle{
+      font-size: clamp(26px, 3.2vw, 34px);
+      margin-bottom: 8px;
+    }
+    .resultText{ margin: 0 0 14px 0; font-weight: 800; color: rgba(15,36,48,.9); }
+
+    .credit{
+      position: fixed;
+      left: 10px;
+      bottom: 10px;
+      font-size: 12px;
+      background: rgba(255,255,255,.65);
+      padding: 6px 8px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="stage">
+
+    <!-- Screen 1: Popup -->
+    <div id="popup" class="popupOverlay">
+      <div class="glass">
+        <h1>Check If You’re Pregnant</h1>
+
+        <div class="iconWrap" aria-hidden="true">
+          <svg class="pregIcon" viewBox="0 0 64 64" fill="none">
+            <circle cx="38" cy="14" r="7" fill="rgba(15,36,48,.85)"/>
+            <path d="M26 58c2-12 3-18 10-22 4-2 8-2 12 1 5 4 6 11 6 21" stroke="rgba(15,36,48,.85)" stroke-width="5" stroke-linecap="round"/>
+            <path d="M18 58c0-12 2-22 10-28" stroke="rgba(15,36,48,.85)" stroke-width="5" stroke-linecap="round"/>
+            <path d="M34 34c-7 0-12 5-12 12 0 7 5 12 12 12 9 0 16-7 16-16 0-6-4-8-8-8" fill="rgba(255,91,126,.55)"/>
+          </svg>
+        </div>
+
+        <button id="startBtn" class="btn">Start</button>
+      </div>
+    </div>
+
+    <!-- Screen 2: Test -->
+    <div id="screenTest" class="center screen">
+      <div class="glass">
+        <h1>Testing…</h1>
+
+        <div class="testWrap">
+          <div class="test" role="img" aria-label="Pregnancy test">
+            <div class="body"></div>
+            <div class="pink"></div>
+            <div class="shine"></div>
+
+            <div class="window" aria-hidden="true">
+              <div id="line1" class="stripe"></div>
+              <div id="line2" class="stripe hidden"></div>
+            </div>
+
+            <div class="capMark"></div>
+          </div>
+        </div>
+
+        <div class="loaderRow">
+          <div class="loader" aria-label="Loading">
+            <div id="bar" class="bar"></div>
+          </div>
+        </div>
+        <div id="status" class="status">Analyzing…</div>
+      </div>
+    </div>
+
+    <!-- Screen 3: Result -->
+    <div id="screenResult" class="center screen">
+      <div class="glass">
+        <h1 class="resultTitle">Congratulations!</h1>
+        <p class="resultText">You’re pregnant.</p>
+
+        <div class="testWrap">
+          <div class="test" role="img" aria-label="Pregnancy test result">
+            <div class="body"></div>
+            <div class="pink"></div>
+            <div class="shine"></div>
+
+            <div class="window" aria-hidden="true">
+              <div class="stripe"></div>
+              <div class="stripe"></div>
+            </div>
+
+            <div class="capMark"></div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <button class="btn" onclick="location.reload()">Restart</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="credit">Background image from Vecteezy</div>
+
+  <script>
+    const startBtn = document.getElementById("startBtn");
+    const popup = document.getElementById("popup");
+    const screenTest = document.getElementById("screenTest");
+    const screenResult = document.getElementById("screenResult");
+    const line1 = document.getElementById("line1");
+    const line2 = document.getElementById("line2");
+    const bar = document.getElementById("bar");
+    const statusEl = document.getElementById("status");
+
+    const show = (el) => el.classList.add("active");
+    const hide = (el) => el.classList.remove("active");
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    async function runTestAnimation(){
+      bar.style.width = "0%";
+      statusEl.textContent = "Analyzing…";
+      line1.classList.remove("hidden");
+      line2.classList.add("hidden");
+
+      for (let i = 0; i < 3; i++){
+        line2.classList.add("hidden");
+        await sleep(550);
+        line2.classList.remove("hidden");
+        await sleep(550);
+      }
+
+      statusEl.textContent = "Finalizing…";
+      const duration = 2600;
+      const start = performance.now();
+
+      function tick(now){
+        const t = Math.min(1, (now - start) / duration);
+        bar.style.width = (t * 100).toFixed(0) + "%";
+        if (t < 1) requestAnimationFrame(tick);
+        else finish();
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function finish(){
+      hide(screenTest);
+      show(screenResult);
+    }
+
+    startBtn.addEventListener("click", async () => {
+      popup.style.display = "none";
+      show(screenTest);
+      await runTestAnimation();
+    });
+  </script>
+</body>
+</html>
